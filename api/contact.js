@@ -1,6 +1,35 @@
 import { Resend } from 'resend';
+import mongoose from 'mongoose';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Cache the MongoDB connection for performance across serverless cold starts
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedDb && mongoose.connection.readyState === 1) return cachedDb;
+
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('Please define the MONGODB_URI environment variable inside Vercel or .env');
+  }
+
+  const conn = await mongoose.connect(uri);
+  cachedDb = conn;
+  return conn;
+}
+
+const portfolioLeadSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, trim: true },
+  phone: { type: String, trim: true },
+  projectType: { type: String, trim: true },
+  message: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now },
+  status: { type: String, default: 'New' }
+}, { strict: false });
+// Ensure it targets the exact collection: 'portfolio_leads'
+const PortfolioLead = mongoose.models.PortfolioLead || mongoose.model('PortfolioLead', portfolioLeadSchema, 'portfolio_leads');
 
 export default async function handler(req, res) {
   // Allow CORS for local testing if needed
@@ -87,6 +116,27 @@ export default async function handler(req, res) {
   `;
 
   try {
+    // 0. Save lead information to MongoDB database
+    try {
+      await connectToDatabase();
+
+      const newLead = new PortfolioLead({
+        name: fullName,
+        email,
+        phone: phone || "N/A",
+        projectType: projectType || "General Inquiry",
+        message,
+        status: "New"
+      });
+
+      await newLead.save();
+      console.log('Successfully saved lead to MongoDB via Mongoose');
+    } catch (dbError) {
+      console.error("Database connection/saving error:", dbError);
+      // We will gracefully continue to send the email so the lead is never fully lost
+      // even if the database is temporarily down or IP whitelist is blocked.
+    }
+
     // 1. Send administrative email to yourself (the Admin Lead)
     // 2. Send automated confirmation email to the user
     // Resend supports sending multiple emails concurrently using Promise.all or an array of objects
