@@ -202,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Form Submission Error:", error);
       submitBtn.textContent = "Error, Try Again";
       successMessage.style.color = "#ff6b6b"; // Red error text
-      successMessage.innerHTML = "<p>Oops! Failed to send the message. Please reach out directly to kalyangk777@gmail.com.</p>";
+      successMessage.innerHTML = "<p>Oops! Failed to send the message. Please reach out directly to contact@kalyangk.online.</p>";
       successMessage.classList.add("show");
     } finally {
       setTimeout(() => {

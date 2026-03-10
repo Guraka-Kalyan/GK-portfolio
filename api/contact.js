@@ -31,8 +31,8 @@ export default async function handler(req, res) {
 
   const fullName = `${firstName} ${lastName}`;
   // You can set ADMIN_EMAIL in Vercel to explicitly route it to your personal Gmail.
-  // E.g., kalyangk777@gmail.com
-  const adminEmail = process.env.ADMIN_EMAIL || "kalyangk777@gmail.com";
+  // E.g., kalyangk7777@gmail.com
+  const adminEmail = process.env.ADMIN_EMAIL || "kalyangk7777@gmail.com";
   const customDomainFrom = "hello@kalyangk.online";
 
   // Admin Notification Email HTML Template (sent to YOU)
