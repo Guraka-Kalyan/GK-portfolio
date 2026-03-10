@@ -1,7 +1,56 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import handler from "./api/contact.js";
+import dotenv from "dotenv";
+
+// Load .env variables locally
+dotenv.config({ path: resolve(__dirname, ".env") });
+
+// Vite Plugin to mock Vercel Serverless Functions during local dev
+function vercelApiMock() {
+  return {
+    name: "vercel-api-mock",
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (req.url === "/api/contact" && req.method === "POST") {
+          let body = "";
+          req.on("data", (chunk) => {
+            body += chunk.toString();
+          });
+          req.on("end", async () => {
+            try {
+              req.body = JSON.parse(body);
+
+              // Mock Vercel res methods
+              res.status = (code) => {
+                res.statusCode = code;
+                return res;
+              };
+              res.json = (data) => {
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify(data));
+              };
+
+              await handler(req, res);
+            } catch (error) {
+              console.error(error);
+              res.statusCode = 500;
+              res.end(JSON.stringify({ success: false, message: "Server error" }));
+            }
+          });
+        } else {
+          next();
+        }
+      });
+    },
+  };
+}
 
 export default defineConfig({
+  server: {
+    port: 3000,
+  },
+  plugins: [vercelApiMock()],
   build: {
     rollupOptions: {
       input: {

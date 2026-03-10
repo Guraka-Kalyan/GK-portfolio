@@ -1,0 +1,208 @@
+# 🎯 Portfolio Project — Full Analysis
+
+## 📦 Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| **React 19 + TypeScript** | Frontend framework |
+| **Vite** | Build tool / Dev server |
+| **TailwindCSS v4** | Utility-first styling |
+| **GSAP + ScrollTrigger** | Scroll-based animations |
+| **@studio-freight/lenis** | Smooth scroll library |
+| **@react-three/fiber + drei** | 3D gallery section (Three.js) |
+| **Lucide React** | Icon library |
+
+---
+
+## 🗂️ Project Structure
+
+```
+portfolio/
+├── sequence/           ← 🔑 THE HERO SEQUENCE IMAGES
+│   ├── s1/            (240 frames — animation segment 1)
+│   ├── s2/            (240 frames — animation segment 2)
+│   └── s3/            (240 frames — animation segment 3)
+├── src/
+│   ├── App.tsx        ← Root component, assembles all sections
+│   └── components/
+│       ├── HeroSection.tsx      ← ⭐ MAIN hero with scroll-video effect
+│       ├── HeroSection.css      ← CSS for hero layout
+│       ├── CustomCursor.tsx     ← Custom mouse cursor
+│       ├── FeaturedProjects.tsx ← Projects section
+│       ├── demo.tsx             ← 3D infinite gallery section
+│       ├── Qualifications.tsx   ← Education & certifications
+│       ├── Experiences.tsx      ← Work experience timeline
+│       ├── Testimonials.tsx     ← Client testimonials
+│       └── Footer.tsx           ← Footer with "Let's Talk"
+└── public/            ← Static assets (vite.svg only)
+```
+
+---
+
+## ⭐ Hero Section — Deep Dive (The "Scroll Video" Effect)
+
+This is the most impressive part. Here's exactly how it works:
+
+### 🎬 The Technique: Canvas + Sequence Images
+
+Instead of using a real video, the hero renders **720 JPEG frames** (3 sequences × 240 frames each) on an **HTML5 Canvas**. As you scroll, GSAP updates which frame is shown — creating a **video-scrubbing illusion**.
+
+### 🔧 Step-by-Step Mechanism
+
+```
+1. LENIS (smooth scroll) → sends scroll events → GSAP ScrollTrigger
+2. ScrollTrigger watches 3 tall sections (each 250vh tall)
+3. As you scroll through each section → GSAP interpolates a "frame" number
+4. The current frame image is drawn onto the Canvas
+5. Canvas is STICKY (stays at top while scroll content flows underneath)
+6. Text overlays fade in/out via opacity animations
+```
+
+### 📐 Layout Architecture
+
+```
+hero-container
+├── canvas-container (position: sticky, top: 0, height: 100vh)
+│   └── <canvas>  ← images are drawn here, always full-screen
+│
+├── fixed-text-container (position: fixed, bottom-right)
+│   ├── #text-1: "Hello, I am Lakshya" + subtitle  ← opacity animates in
+│   ├── #text-2: "The Evolution" + subtitle         ← fades in on section 2
+│   └── #text-3: "The Future" + subtitle             ← fades in on section 3
+│
+└── <main> scroll-content (z-index: 10, flows over canvas)
+    ├── #section-1  (250vh tall — empty, just triggers scroll)
+    ├── #section-2  (250vh tall — empty, just triggers scroll)
+    └── #section-3  (250vh tall — empty, just triggers scroll)
+```
+
+### 🖼️ Image Drawing: [drawImageProp()](file:///E:/portfolio/portfolio/src/components/HeroSection.tsx#45-73)
+
+The canvas uses a custom **"cover" drawing function** that:
+- Calculates aspect ratio to fill the entire screen
+- Works like CSS `object-fit: cover`
+- Re-renders on window resize
+
+### 📊 Sequence Details
+
+| Sequence | Folder | Frames | Scroll Section | Total Height |
+|---|---|---|---|---|
+| 1 | `/sequence/s1/` | 240 | `#section-1` | 250vh |
+| 2 | `/sequence/s2/` | 240 | `#section-2` | 250vh |
+| 3 | `/sequence/s3/` | 240 | `#section-3` | 250vh |
+
+**Total hero scroll height = 750vh** (7.5× screen height!)
+
+> [!NOTE]
+> Files are named `ezgif-frame-001.jpg` to `ezgif-frame-240.jpg` — named using the "ezgif.com" GIF splitter tool. Your friend converted a GIF/video into frames using ezgif.com.
+
+### 🌀 Frame Loading
+
+```typescript
+// Preloads ALL 720 images at page load!
+for (let i = 1; i <= 240; i++) {
+  img.src = `/sequence/s1/ezgif-frame-${pad(i, 3)}.jpg`;
+}
+```
+All images loaded via `new Image()` on mount — browser caches them for smooth playback.
+
+---
+
+## 📋 All Sections — Content That Needs Replacing (Your Info)
+
+### 1. 🦸 HeroSection.tsx — Text Overlays
+Located in the `fixed-text-container`:
+
+| Element | Current (Friend's text) | Replace with YOUR info |
+|---|---|---|
+| `#text-1 h2` | `Hello!, I am Lakshya` | Your name |
+| `#text-1 p` | `Welcome to my portfolio. Scroll down...` | Your tagline |
+| `#text-2 h2` | `The Evolution` | Can keep or change |
+| `#text-2 p` | description | Can keep or change |
+| `#text-3 h2` | `The Future` | Can keep or change |
+| `#text-3 p` | description | Can keep or change |
+
+---
+
+### 2. 🖼️ FeaturedProjects.tsx — Projects
+All 3 projects are placeholder / fictional:
+
+| Field | project 1 | project 2 | project 3 |
+|---|---|---|---|
+| `title` | Ethereal Echoes | Neon Nexus | Aura Architecture |
+| `category` | Creative Direction - Web Design | UI/UX - 3D Development | Brand Identity - Frontend |
+| `image` | Unsplash URL | Unsplash URL | Unsplash URL |
+| `year` | 2024 | 2023 | 2023 |
+
+**→ Replace with your real projects, real screenshots, real years & categories**
+
+---
+
+### 3. 💼 Experiences.tsx — Work History
+All 3 are fictional jobs:
+
+| Field | exp 1 | exp 2 | exp 3 |
+|---|---|---|---|
+| `role` | Senior Frontend Engineer | Creative Developer | UI Engineer |
+| `company` | **Vercel** | **Studio Freight** | **Stripe** |
+| `period` | 2023 - Present | 2021 - 2023 | 2019 - 2021 |
+| `description` | ... | ... | ... |
+
+**→ Replace with your real job history**
+
+---
+
+### 4. 🎓 Qualifications.tsx — Education & Certs
+All 3 are fictional:
+
+| Field | qual 1 | qual 2 | qual 3 |
+|---|---|---|---|
+| `title` | B.Sc. in Computer Science | Advanced Web Animations | Certified Cloud Practitioner |
+| `institution` | **Stanford University** | Awwwards Academy | **AWS** |
+| `year` | 2018 - 2022 | 2023 | 2023 |
+
+**→ Replace with your real education & certifications**
+
+---
+
+### 5. 💬 Testimonials.tsx — Client Feedback
+All 3 are fictional testimonials. Either:
+- Replace with real client testimonials if you have them
+- Or repurpose this section (e.g., skills, stats, etc.)
+
+---
+
+### 6. 🦶 Footer.tsx — Contact Info
+
+| Element | Current | Replace with |
+|---|---|---|
+| Email link | `hello@example.com` | Your real email |
+| Name in © | `Lakshya` | Your name |
+| Twitter link | `#` | Your Twitter/X URL |
+| LinkedIn link | `#` | Your LinkedIn URL |
+| Instagram link | `#` | Your Instagram URL |
+| GitHub link | `#` | Your GitHub URL |
+
+---
+
+### 7. 🖱️ demo.tsx — "My Works" 3D Gallery
+The 8 images are random Unsplash photos. Replace with screenshots of your actual projects.
+
+---
+
+## 🚀 Next Steps Plan
+
+1. **Update HeroSection.tsx** — Change name + taglines to yours
+2. **Update FeaturedProjects.tsx** — Your real projects + screenshots
+3. **Update Experiences.tsx** — Your real work experience
+4. **Update Qualifications.tsx** — Your real education/certs
+5. **Update Testimonials.tsx** — Real testimonials or repurpose section
+6. **Update Footer.tsx** — Your real email + social links
+7. **Update demo.tsx** — Screenshots of your actual work
+8. **Optional: Replace sequence images** — if you want YOUR cinematic intro instead of friend's
+
+> [!IMPORTANT]
+> The sequence images (`/sequence/s1/`, `s2/`, `s3/`) contain the friend's hero animation images. These are the most visually striking part — if you want to keep the same cinematic feel, you can **keep the same images** for now and just update the text overlays, OR create your own sequence frames later.
+
+> [!TIP]
+> Since you already have project info from the previous conversation (Guraka Kalyan — Full Stack Developer), we can quickly customize all sections with your details!

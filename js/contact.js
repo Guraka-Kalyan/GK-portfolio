@@ -163,25 +163,56 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Handle form submission with feedback
-  const handleFormSubmit = (e) => {
+  // Handle form submission with fetch call to Vercel Serverless function
+  const handleFormSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission
     const form = e.target;
     const submitBtn = form.querySelector(".submit-btn"); // Submit button
     const successMessage = document.getElementById("successMessage"); // Success message element
+
+    // Collect specific form data
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
     submitBtn.style.transform = "translateY(-1px)"; // Slight button press effect
     submitBtn.textContent = "Sending..."; // Update button text
     submitBtn.disabled = true; // Disable button
-    setTimeout(() => {
-      form.reset(); // Reset form
-      submitBtn.textContent = "Send Message"; // Restore button text
-      submitBtn.disabled = false; // Enable button
-      submitBtn.style.transform = ""; // Reset button style
-      successMessage.classList.add("show"); // Show success message
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        form.reset(); // Reset form
+        submitBtn.textContent = "Message Sent ✓"; // Restore button text
+        successMessage.classList.add("show"); // Show success message
+        successMessage.style.color = ""; // Make sure it's default color for success
+        successMessage.innerHTML = "<p>Thanks! Your message has been sent. I'll get back to you within 24 hours.</p>";
+      } else {
+        throw new Error(result.message || "Failed to send.");
+      }
+    } catch (error) {
+      console.error("Form Submission Error:", error);
+      submitBtn.textContent = "Error, Try Again";
+      successMessage.style.color = "#ff6b6b"; // Red error text
+      successMessage.innerHTML = "<p>Oops! Failed to send the message. Please reach out directly to kalyangk777@gmail.com.</p>";
+      successMessage.classList.add("show");
+    } finally {
       setTimeout(() => {
-        successMessage.classList.remove("show"); // Hide after 5s
+        submitBtn.disabled = false; // Enable button
+        submitBtn.style.transform = ""; // Reset button style
+        submitBtn.textContent = "Send Message"; // Reset button copy
+        successMessage.classList.remove("show"); // Hide popup after 5s
+        successMessage.style.color = ""; // Reset color format
       }, 5000);
-    }, 1500); // Simulate form submission delay
+    }
   };
 
   // Enhance form inputs with focus/blur animations
