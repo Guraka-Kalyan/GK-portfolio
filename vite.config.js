@@ -1,10 +1,5 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
-import handler from "./api/contact.js";
-import dotenv from "dotenv";
-
-// Load .env variables locally
-dotenv.config({ path: resolve(__dirname, ".env") });
 
 // Vite Plugin to mock Vercel Serverless Functions during local dev
 function vercelApiMock() {
@@ -20,6 +15,11 @@ function vercelApiMock() {
           req.on("end", async () => {
             try {
               req.body = JSON.parse(body);
+
+              // Dynamically import only during local runtime, preventing Vercel build crashes
+              const dotenv = await import("dotenv");
+              const { default: handler } = await import("./api/contact.js");
+              dotenv.config({ path: resolve(process.cwd(), ".env") });
 
               // Mock Vercel res methods
               res.status = (code) => {
