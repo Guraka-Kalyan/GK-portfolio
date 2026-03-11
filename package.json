@@ -1,7 +1,7 @@
 {
-    "name": "prashant-koirala-portfolio",
+    "name": "gk-portfolio",
     "version": "1.0.0",
-    "description": "Prashant Koirala's Portfolio",
+    "description": "Guraka Kalyan's Portfolio",
     "main": "index.js",
     "scripts": {
         "dev": "vite",
@@ -10,7 +10,7 @@
         "host": "vite --host"
     },
     "keywords": [],
-    "author": "Prashant Koirala",
+    "author": "Guraka Kalyan",
     "license": "MIT",
     "dependencies": {
         "dotenv": "^17.3.1",
