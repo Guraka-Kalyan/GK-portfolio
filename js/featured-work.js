@@ -55,10 +55,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const projectUrls = [
       "venturemond.com",
       "stacli.com",
-      "pinaka-retail.internal (NDA Secured)",
-      "pinaka-farm.internal (NDA Secured)",
-      "leadmanager.local (Open Source)",
-      "insight-ai.edu (Open Source)"
+      "pinaka-retail (NDA Secured)",
+      "pinaka-farm (NDA Secured)",
+      "leadmanager (Open Source)",
+      "insight-ai.kalyangk.online (Open Source)"
     ];
 
     let currentActiveIndex = 0; // Tracks the currently active project card index
