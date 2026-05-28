@@ -51,22 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Animations for larger screens (> 1000px)
     if (window.innerWidth > 1000) {
-      // Portrait animation (if element exists)
-      const portraitElement = document.querySelector(".about-hero-portrait");
-      if (portraitElement) {
-        const portraitAnimation = gsap.to(".about-hero-portrait", {
-          y: -200, // Move up by 200px
-          rotation: -25, // Rotate -25 degrees
-          scrollTrigger: {
-            trigger: ".about-hero", // Trigger element
-            start: "top top", // Start when top of hero hits top of viewport
-            end: "bottom top", // End when bottom of hero hits top of viewport
-            scrub: 1, // Tie animation to scroll position
-          },
-        });
-        scrollTriggerInstances.push(portraitAnimation.scrollTrigger); // Store instance
-      }
-
       // Tag animations (if elements exist)
       const tag1 = document.querySelector("#tag-1");
       if (tag1) {
@@ -145,8 +129,103 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Live Compiling Terminal Animation
+  const initTerminal = () => {
+    const codeBody = document.querySelector(".terminal-code-body");
+    if (!codeBody) return;
+
+    // Define the compiler terminal output lines
+    const terminalLines = [
+      { text: "✦ Guraka Kalyan // Full Stack Engine v1.0.0", class: "term-head" },
+      { text: "[INFO] Connecting to MongoDB Atlas... [CONNECTED]", class: "term-info", successWord: "[CONNECTED]" },
+      { text: "[INFO] Handshake with Resend API... [SUCCESS]", class: "term-info", successWord: "[SUCCESS]" },
+      { text: "[ROUTE] GET /api/featured-projects... [200 OK]", class: "term-route", successWord: "[200 OK]" },
+      { text: "[ROUTE] POST /api/leads... [201 CREATED]", class: "term-route", successWord: "[201 CREATED]" },
+      { text: "[ROUTE] GET /api/inventory... [200 OK]", class: "term-route", successWord: "[200 OK]" },
+      { text: "[SYS] 6 projects deployed. All systems running.", class: "term-sys" },
+      { text: "[SYS] Stack: MERN | Python | Java | REST APIs", class: "term-sys" },
+      { text: "[SYS] Ready to Build / Ship / Scale / Repeat. ", class: "term-sys" }
+    ];
+
+    let currentLine = 0;
+    let timer = null;
+
+    const startTyping = () => {
+      codeBody.innerHTML = "";
+      currentLine = 0;
+      typeNextLine();
+    };
+
+    const typeNextLine = () => {
+      if (currentLine >= terminalLines.length) {
+        // When typing completes, make the cursor blink infinitely for 4 seconds, then restart loop
+        const activeCursor = codeBody.querySelector(".terminal-cursor");
+        if (activeCursor) {
+          activeCursor.classList.add("blink");
+        }
+        timer = setTimeout(() => {
+          startTyping();
+        }, 4000);
+        return;
+      }
+
+      const lineData = terminalLines[currentLine];
+      const lineEl = document.createElement("div");
+      lineEl.className = "terminal-line " + (lineData.class || "");
+      codeBody.appendChild(lineEl);
+
+      const textSpan = document.createElement("span");
+      lineEl.appendChild(textSpan);
+
+      const cursorSpan = document.createElement("span");
+      cursorSpan.className = "terminal-cursor";
+      cursorSpan.textContent = "▌";
+      lineEl.appendChild(cursorSpan);
+
+      let charIndex = 0;
+      const fullText = lineData.text;
+
+      const typeChar = () => {
+        if (charIndex < fullText.length) {
+          // Detect and color code our glowing success badges
+          if (lineData.successWord && fullText.substring(charIndex).startsWith(lineData.successWord)) {
+            const successSpan = document.createElement("span");
+            successSpan.className = "term-success";
+            successSpan.textContent = lineData.successWord;
+            textSpan.appendChild(successSpan);
+            charIndex += lineData.successWord.length;
+          } else {
+            textSpan.appendChild(document.createTextNode(fullText[charIndex]));
+            charIndex++;
+          }
+
+          // Dynamic randomized organic typing delay
+          const delay = Math.random() * 8 + 12;
+          timer = setTimeout(typeChar, delay);
+        } else {
+          // Finished typing line, remove transient typing cursor (the last line keeps it for loop wait)
+          if (currentLine < terminalLines.length - 1) {
+            cursorSpan.remove();
+          }
+          currentLine++;
+          // Delay before next line triggers compile print
+          timer = setTimeout(typeNextLine, 450);
+        }
+      };
+
+      typeChar();
+    };
+
+    startTyping();
+
+    return () => {
+      clearTimeout(timer);
+    };
+  };
+
   // Run animations on page load
   initAnimations();
+  const cleanTerminal = initTerminal();
 
   // Re-run animations on window resize to recalculate trigger points
   window.addEventListener("resize", () => {

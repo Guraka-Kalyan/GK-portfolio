@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize animations
   const initAnimations = () => {
-    // Disable animations on small screens (width <= 1000px)
+    // Disable animations on small screens (width <= 1000px) and fallback to CSS stack
     if (window.innerWidth <= 1000) {
       if (scrollTriggerInstance) {
         scrollTriggerInstance.kill(); // Clean up existing ScrollTrigger
@@ -31,10 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
       scrollTriggerInstance.kill();
     }
 
-    // Create section indicators (e.g., "01", "02", ..., "05") and progress dots
+    // Create section indicators (e.g., "01", "02", ..., "06") and progress dots
     const indicatorContainer = document.querySelector(".featured-work-indicator");
     indicatorContainer.innerHTML = ""; // Clear existing content
-    for (let section = 1; section <= 3; section++) {
+    for (let section = 1; section <= 6; section++) {
       // Add section number
       const sectionNumber = document.createElement("p");
       sectionNumber.className = "mn";
@@ -48,115 +48,105 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Define image card positions for small and large screens
-    const featuredCardPosSmall = [
-      { y: 100, x: 1000 },
-      { y: 1500, x: 100 },
-      { y: 1250, x: 1950 },
-      { y: 1500, x: 850 },
-      { y: 200, x: 2100 },
-      { y: 250, x: 600 },
-      { y: 1100, x: 1650 },
-      { y: 1000, x: 800 },
-      { y: 900, x: 2200 },
-      { y: 150, x: 1600 },
+    const detailCards = document.querySelectorAll(".project-details-card");
+    const mockupImages = document.querySelectorAll(".browser-img-container img");
+    const urlText = document.querySelector(".browser-url-bar .url-text");
+
+    const projectUrls = [
+      "venturemond.com",
+      "stacli.com",
+      "pinaka-retail.internal (NDA Secured)",
+      "pinaka-farm.internal (NDA Secured)",
+      "leadmanager.local (Open Source)",
+      "insight-ai.edu (Open Source)"
     ];
-    const featuredCardPosLarge = [
-      { y: 800, x: 5000 },
-      { y: 2000, x: 3000 },
-      { y: 240, x: 4450 },
-      { y: 1200, x: 3450 },
-      { y: 500, x: 2200 },
-      { y: 750, x: 1100 },
-      { y: 1850, x: 3350 },
-      { y: 2200, x: 1300 },
-      { y: 3000, x: 1950 },
-      { y: 500, x: 4500 },
-    ];
-    // Select position set based on screen width
-    const featuredCardPos =
-      window.innerWidth >= 1600 ? featuredCardPosLarge : featuredCardPosSmall;
 
-    // Set up featured titles container
-    const featuredTitles = document.querySelector(".featured-titles");
-    const moveDistance = window.innerWidth * 4; // Distance for title movement
+    let currentActiveIndex = 0; // Tracks the currently active project card index
 
-    // Create image cards dynamically
-    const imagesContainer = document.querySelector(".featured-images");
-    imagesContainer.innerHTML = ""; // Clear existing content
-    for (let i = 1; i <= 3; i++) {
-      const featuredImgCard = document.createElement("div");
-      featuredImgCard.className = `featured-img-card featured-img-card-${i}`;
-      const img = document.createElement("img");
-      img.src = `/images/work-items/work-item-${i}.jpg`;
-      img.alt = `project screenshot ${i}`;
-      featuredImgCard.appendChild(img);
-      // Set initial position from predefined coordinates
-      const position = featuredCardPos[i - 1];
-      gsap.set(featuredImgCard, {
-        x: position.x,
-        y: position.y,
-      });
-      imagesContainer.appendChild(featuredImgCard);
-    }
+    // Initialize layout states for desktop
+    gsap.set(detailCards, { opacity: 0, y: 50, display: "none" });
+    gsap.set(mockupImages, { opacity: 0, scale: 0.95 });
 
-    // Initialize image cards with hidden and scaled-down state
-    const featuredImgCards = document.querySelectorAll(".featured-img-card");
-    featuredImgCards.forEach((featuredImgCard) => {
-      gsap.set(featuredImgCard, {
-        z: -1500, // Push back in 3D space
-        scale: 0, // Scale down to invisible
-      });
-    });
+    // Activate the first project immediately
+    gsap.set(detailCards[0], { opacity: 1, y: 0, display: "flex" });
+    gsap.set(mockupImages[0], { opacity: 1, scale: 1 });
+    urlText.textContent = projectUrls[0];
 
-    // Create ScrollTrigger for animation
+    // Create ScrollTrigger for split-screen panel morphing
     scrollTriggerInstance = ScrollTrigger.create({
       trigger: ".featured-work", // Trigger element
-      start: "top top", // Start when top of trigger hits top of viewport
-      end: `+=${window.innerHeight * 3}px`, // Extend scroll distance
-      pin: true, // Pin section during scroll
-      scrub: 1, // Smoothly tie animations to scroll position
+      start: "top top", // Pin immediately when section hits top of viewport
+      end: `+=${window.innerHeight * 5}px`, // Pinned for 5 viewport heights of scrolling
+      pin: true, // Lock the screen during transitions
+      scrub: 0.5, // Tie animations smoothly to scroll velocity
       onUpdate: (self) => {
-        // Move titles horizontally based on scroll progress
-        const xPosition = -moveDistance * self.progress;
-        gsap.set(featuredTitles, {
-          x: xPosition,
-        });
+        const progress = self.progress; // Scroll progress (0 to 1)
 
-        // Animate image cards (z-position and scale) with stagger
-        featuredImgCards.forEach((featuredImgCard, index) => {
-          const staggerOffset = index * 0.075; // Delay per card
-          const scaledProgress = (self.progress - staggerOffset) * 2; // Adjust progress
-          const individualProgress = Math.max(0, Math.min(1, scaledProgress)); // Clamp to [0,1]
-          const newZ = -1500 + (1500 + 1500) * individualProgress; // Move from -1500 to 1500
-          const scaleProgress = Math.min(1, individualProgress * 10); // Faster scale change
-          const scale = Math.max(0, Math.min(1, scaleProgress)); // Clamp scale to [0,1]
-          gsap.set(featuredImgCard, {
-            z: newZ,
-            scale: scale,
+        // Calculate active index (0 to 5)
+        const rawIndex = Math.floor(progress * 5.99); // Maps progress securely to [0, 5]
+        const activeIndex = Math.min(5, Math.max(0, rawIndex));
+
+        // Only transition if the project index has actually changed
+        if (activeIndex !== currentActiveIndex) {
+          const prevIndex = currentActiveIndex;
+          currentActiveIndex = activeIndex;
+
+          // Transition Left Panel Details Cards
+          gsap.to(detailCards[prevIndex], {
+            opacity: 0,
+            y: -30,
+            duration: 0.35,
+            ease: "power2.inOut",
+            onComplete: () => {
+              gsap.set(detailCards[prevIndex], { display: "none" });
+              gsap.set(detailCards[activeIndex], { display: "flex" });
+              gsap.to(detailCards[activeIndex], {
+                opacity: 1,
+                y: 0,
+                duration: 0.45,
+                ease: "power2.out"
+              });
+            }
           });
-        });
 
-        // Update indicator opacity based on scroll progress
+          // Transition Right Panel Browser Mockup Screenshots
+          gsap.to(mockupImages[prevIndex], {
+            opacity: 0,
+            scale: 0.95,
+            duration: 0.4,
+            ease: "power2.inOut"
+          });
+          gsap.to(mockupImages[activeIndex], {
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            ease: "power2.out"
+          });
+
+          // Smoothly update the browser URL bar text
+          urlText.textContent = projectUrls[activeIndex];
+        }
+
+        // Update indicator progress dots based on current scroll position
         const indicators = document.querySelectorAll(".indicator");
         const totalIndicators = indicators.length;
         const progressPerIndicator = 1 / totalIndicators;
         indicators.forEach((indicator, index) => {
           const indicatorStart = index * progressPerIndicator;
-          const indicatorOpacity = self.progress > indicatorStart ? 1 : 0.2;
+          const indicatorOpacity = progress > indicatorStart ? 1 : 0.2;
           gsap.to(indicator, {
             opacity: indicatorOpacity,
-            duration: 0.3, // Smooth opacity transition
+            duration: 0.1
           });
         });
-      },
+      }
     });
   };
 
   // Run animations on page load
   initAnimations();
 
-  // Re-run animations on window resize to recalculate positions and trigger points
+  // Re-run animations on window resize to recalculate coordinates and responsive behaviors
   window.addEventListener("resize", () => {
     initAnimations();
   });
