@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "stacli.com",
       "pinaka-retail (NDA Secured)",
       "pinaka-farm (NDA Secured)",
-      "leadmanager (Open Source)",
+      "leadmanagement-system (Open Source)",
       "insight-ai.kalyangk.online (Open Source)"
     ];
 
