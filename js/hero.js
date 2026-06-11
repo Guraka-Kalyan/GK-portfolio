@@ -38,26 +38,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!heroImgContainer) return;
 
-    // Create a direct, highly-optimized scrubbed tween on the cached container
-    scrollTriggerInstance = gsap.fromTo(
-      heroImgContainer,
-      {
-        y: "-110%",
-        scale: 0.25,
-        rotation: -15,
+    // Restore the exact original scroll animation logic (fully linear) using the cached DOM node
+    scrollTriggerInstance = ScrollTrigger.create({
+      trigger: ".hero-img-holder", // Element that triggers animation
+      start: "top bottom", // Animation starts when top of trigger hits bottom of viewport
+      end: "top top", // Animation ends when top of trigger hits top of viewport
+      onUpdate: (self) => {
+        const progress = self.progress; // Scroll progress (0 to 1)
+        // Animate hero image properties based on scroll progress
+        gsap.set(heroImgContainer, {
+          y: `${-110 + 110 * progress}%`, // Move up from -110% to 0%
+          scale: 0.25 + 0.75 * progress, // Scale from 0.25 to 1
+          rotation: -15 + 15 * progress, // Rotate from -15deg to 0deg
+        });
       },
-      {
-        y: "0%",
-        scale: 1,
-        rotation: 0,
-        scrollTrigger: {
-          trigger: ".hero-img-holder", // Element that triggers animation
-          start: "top bottom", // Animation starts when top of trigger hits bottom of viewport
-          end: "top top", // Animation ends when top of trigger hits top of viewport
-          scrub: true, // Tie animation directly to scroll position
-        },
-      }
-    ).scrollTrigger;
+    });
   };
 
   // Run animations on page load
