@@ -64,6 +64,21 @@
     border-radius: 2em;
     overflow: hidden;
   }
+
+  .hero-img-holder .hero-img img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+  }
+
+  .hero-img-holder .hero-img img.active {
+    opacity: 1;
+  }
   
   /* home - featured work (Overhauled Premium Dark Glassmorphism) */
   .featured-work {
@@ -417,6 +432,11 @@
     height: 1.5px;
     background-color: var(--bg);
     opacity: 0.2;
+    transition: opacity 0.15s ease;
+  }
+
+  .featured-work .featured-work-indicator .indicator.active {
+    opacity: 1;
   }
 
   .featured-work .featured-work-footer {
@@ -782,9 +802,9 @@
       opacity: 1 !important;
       transform: none !important;
       padding: 2.5em 2em;
-      background: rgba(15, 15, 15, 0.85); /* Premium dark glassmorphism for contrast */
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(15, 15, 15, 0.95); /* High opacity flat color on mobile to avoid layout thrashing */
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 24px;
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
@@ -858,6 +878,9 @@
       border-radius: 16px;
       overflow: hidden;
       transition: height 0.5s ease, border-color 0.4s ease;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: rgba(14, 14, 17, 0.97); /* Deep dark flat background on mobile */
     }
 
     .service-drawer.is-expanded {

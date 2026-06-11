@@ -227,8 +227,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initAnimations();
   const cleanTerminal = initTerminal();
 
-  // Re-run animations on window resize to recalculate trigger points
+  // Re-run animations only when viewport width changes to avoid mobile address bar height triggers
+  let lastWidth = window.innerWidth;
   window.addEventListener("resize", () => {
-    initAnimations();
+    if (window.innerWidth !== lastWidth) {
+      lastWidth = window.innerWidth;
+      initAnimations();
+    }
   });
 });

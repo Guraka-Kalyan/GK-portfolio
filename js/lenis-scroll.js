@@ -18,14 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
         direction: "vertical", // Scroll direction
         gestureDirection: "vertical", // Gesture direction for touch
         smooth: true, // Enable smooth scrolling
-        smoothTouch: true, // Enable smooth scrolling for touch devices
+        smoothTouch: false, // Disable smooth scrolling for touch devices to use native scroll
         touchMultiplier: 1.5, // Sensitivity for touch scrolling
         infinite: false, // No infinite scroll
         lerp: 0.05, // Linear interpolation for smoother scroll
         wheelMultiplier: 1, // Scroll wheel sensitivity
         orientation: "vertical", // Scroll orientation
         smoothWheel: true, // Smooth wheel scrolling
-        syncTouch: true, // Sync touch scroll with native scroll
+        syncTouch: false, // Disable syncing touch scroll with native scroll
       }
     : {
         duration: 1.2, // Slightly longer duration for desktop
@@ -74,14 +74,14 @@ document.addEventListener("DOMContentLoaded", () => {
             direction: "vertical",
             gestureDirection: "vertical",
             smooth: true,
-            smoothTouch: true,
+            smoothTouch: false, // Disable smooth touch on mobile resize
             touchMultiplier: 1.5,
             infinite: false,
             lerp: 0.05,
             wheelMultiplier: 1,
             orientation: "vertical",
             smoothWheel: true,
-            syncTouch: true,
+            syncTouch: false, // Disable sync touch on mobile resize
           }
         : {
             duration: 1.2,

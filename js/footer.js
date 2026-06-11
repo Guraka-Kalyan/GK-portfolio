@@ -23,10 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   
     // Define particle images
-    const imageParticleCount = 10; // Number of particle images
+    const imageParticleCount = 6; // Number of existing particle images (only 1 to 6 exist)
     const imagePaths = Array.from(
       { length: imageParticleCount },
-      (_, i) => `/images/work-items/work-item-${i + 1}.jpg` // Paths to images (work-item-1.jpg to work-item-10.jpg)
+      (_, i) => `/images/work-items/work-item-${i + 1}.jpg` // Paths to images (work-item-1.jpg to work-item-6.jpg)
     );
   
     // Preload images to avoid delays
@@ -100,33 +100,33 @@ document.addEventListener("DOMContentLoaded", () => {
       animate(); // Start animation
     };
   
-    // Check if footer is in viewport to trigger explosion
-    const checkFooterPosition = () => {
-      const footerRect = footer.getBoundingClientRect(); // Get footer position
-      const viewportHeight = window.innerHeight; // Viewport height
-      // Reset explosion if footer is far above viewport
-      if (footerRect.top > viewportHeight + 100) {
-        hasExploded = false;
-      }
-      // Trigger explosion if footer is within 250px of viewport bottom
-      if (!hasExploded && footerRect.top <= viewportHeight + 250) {
-        explode();
-      }
-    };
-  
-    // Debounce scroll event to check footer position
-    let checkTimeout;
-    window.addEventListener("scroll", () => {
-      clearTimeout(checkTimeout); // Clear previous timeout
-      checkTimeout = setTimeout(checkFooterPosition, 5); // Check after 5ms
+    // Use IntersectionObserver to check footer visibility instead of heavy scroll listener
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (!hasExploded) {
+            explode();
+          }
+        } else {
+          // Reset hasExploded only if the footer is scrolled far above the viewport
+          const rect = entry.boundingClientRect;
+          if (rect.top > window.innerHeight + 100) {
+            hasExploded = false;
+          }
+        }
+      });
+    }, {
+      rootMargin: "0px 0px 250px 0px", // Trigger when footer is within 250px of entering viewport
+      threshold: 0
     });
+  
+    observer.observe(footer);
   
     // Reset explosion on window resize
     window.addEventListener("resize", () => {
       hasExploded = false;
     });
   
-    // Initialize particles and check footer position on load
+    // Initialize particles on load
     createParticles();
-    setTimeout(checkFooterPosition, 500); // Initial check after 500ms
   });

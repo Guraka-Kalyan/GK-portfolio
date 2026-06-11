@@ -147,5 +147,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initial setup and responsive listener
   setupDrawers();
-  window.addEventListener("resize", setupDrawers);
+  let lastWidth = window.innerWidth;
+  window.addEventListener("resize", () => {
+    if (window.innerWidth !== lastWidth) {
+      lastWidth = window.innerWidth;
+      setupDrawers();
+    }
+  });
 });

@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
     isDesktop = window.innerWidth > 1000; // Update desktop state
     if (isDesktop && !wasDesktop) {
       startAnimation(); // Start animation on desktop
-    } else if (!wasDesktop && isDesktop) {
+    } else if (wasDesktop && !isDesktop) {
       stopAnimation(); // Stop animation on mobile
     }
   };

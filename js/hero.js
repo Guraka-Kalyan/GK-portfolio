@@ -13,20 +13,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Register ScrollTrigger plugin with GSAP
   gsap.registerPlugin(ScrollTrigger);
 
-  // Select hero image element
-  const heroImg = document.querySelector(".hero-img img");
-  let currentImageIndex = 1; // Tracks current image in sequence
-  const totalImages = 6; // Total number of images for cycling (updated to match 6 uploaded project screenshots)
+  // Select elements
+  const heroImgContainer = document.querySelector(".hero-img");
+  const heroImages = document.querySelectorAll(".hero-img img");
+  let currentImageIndex = 0;
+  const totalImages = heroImages.length;
   let scrollTriggerInstance = null; // Stores ScrollTrigger instance for cleanup
 
-  // Cycle through images every 250ms
-  setInterval(() => {
-    // Increment image index, reset to 1 if it exceeds totalImages
-    currentImageIndex =
-      currentImageIndex >= totalImages ? 1 : currentImageIndex + 1;
-    // Update hero image source
-    heroImg.src = `/images/work-items/work-item-${currentImageIndex}.jpg`;
-  }, 250);
+  // Cycle through preloaded images every 1000ms using opacity fades
+  if (totalImages > 0) {
+    setInterval(() => {
+      heroImages[currentImageIndex].classList.remove("active");
+      currentImageIndex = (currentImageIndex + 1) % totalImages;
+      heroImages[currentImageIndex].classList.add("active");
+    }, 1000);
+  }
 
   // Initialize animations with ScrollTrigger
   const initAnimations = () => {
@@ -35,28 +36,39 @@ document.addEventListener("DOMContentLoaded", () => {
       scrollTriggerInstance.kill();
     }
 
-    // Create new ScrollTrigger instance
-    scrollTriggerInstance = ScrollTrigger.create({
-      trigger: ".hero-img-holder", // Element that triggers animation
-      start: "top bottom", // Animation starts when top of trigger hits bottom of viewport
-      end: "top top", // Animation ends when top of trigger hits top of viewport
-      onUpdate: (self) => {
-        const progress = self.progress; // Scroll progress (0 to 1)
-        // Animate hero image properties based on scroll progress
-        gsap.set(".hero-img", {
-          y: `${-110 + 110 * progress}%`, // Move up from -110% to 0%
-          scale: 0.25 + 0.75 * progress, // Scale from 0.25 to 1
-          rotation: -15 + 15 * progress, // Rotate from -15deg to 0deg
-        });
+    if (!heroImgContainer) return;
+
+    // Create a direct, highly-optimized scrubbed tween on the cached container
+    scrollTriggerInstance = gsap.fromTo(
+      heroImgContainer,
+      {
+        y: "-110%",
+        scale: 0.25,
+        rotation: -15,
       },
-    });
+      {
+        y: "0%",
+        scale: 1,
+        rotation: 0,
+        scrollTrigger: {
+          trigger: ".hero-img-holder", // Element that triggers animation
+          start: "top bottom", // Animation starts when top of trigger hits bottom of viewport
+          end: "top top", // Animation ends when top of trigger hits top of viewport
+          scrub: true, // Tie animation directly to scroll position
+        },
+      }
+    ).scrollTrigger;
   };
 
   // Run animations on page load
   initAnimations();
 
-  // Re-run animations on window resize to recalculate trigger points
+  // Track window width to prevent height-only resizes (mobile address bar) from restarting ScrollTrigger
+  let lastWidth = window.innerWidth;
   window.addEventListener("resize", () => {
-    initAnimations();
+    if (window.innerWidth !== lastWidth) {
+      lastWidth = window.innerWidth;
+      initAnimations();
+    }
   });
 });

@@ -33,18 +33,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create section indicators (e.g., "01", "02", ..., "06") and progress dots
     const indicatorContainer = document.querySelector(".featured-work-indicator");
-    indicatorContainer.innerHTML = ""; // Clear existing content
-    for (let section = 1; section <= 6; section++) {
-      // Add section number
-      const sectionNumber = document.createElement("p");
-      sectionNumber.className = "mn";
-      sectionNumber.textContent = `0${section}`;
-      indicatorContainer.appendChild(sectionNumber);
-      // Add 6 progress indicators per section
-      for (let i = 0; i < 6; i++) {
-        const indicator = document.createElement("div");
-        indicator.className = "indicator";
-        indicatorContainer.appendChild(indicator);
+    if (indicatorContainer) {
+      indicatorContainer.innerHTML = ""; // Clear existing content
+      for (let section = 1; section <= 6; section++) {
+        // Add section number
+        const sectionNumber = document.createElement("p");
+        sectionNumber.className = "mn";
+        sectionNumber.textContent = `0${section}`;
+        indicatorContainer.appendChild(sectionNumber);
+        // Add 6 progress indicators per section
+        for (let i = 0; i < 6; i++) {
+          const indicator = document.createElement("div");
+          indicator.className = "indicator";
+          indicatorContainer.appendChild(indicator);
+        }
       }
     }
 
@@ -68,9 +70,14 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.set(mockupImages, { opacity: 0, scale: 0.95 });
 
     // Activate the first project immediately
-    gsap.set(detailCards[0], { opacity: 1, y: 0, display: "flex" });
-    gsap.set(mockupImages[0], { opacity: 1, scale: 1 });
-    urlText.textContent = projectUrls[0];
+    if (detailCards.length > 0) gsap.set(detailCards[0], { opacity: 1, y: 0, display: "flex" });
+    if (mockupImages.length > 0) gsap.set(mockupImages[0], { opacity: 1, scale: 1 });
+    if (urlText) urlText.textContent = projectUrls[0];
+
+    // Cache indicators collection and calculations
+    const indicators = indicatorContainer ? indicatorContainer.querySelectorAll(".indicator") : [];
+    const totalIndicators = indicators.length;
+    const progressPerIndicator = totalIndicators > 0 ? 1 / totalIndicators : 1;
 
     // Create ScrollTrigger for split-screen panel morphing
     scrollTriggerInstance = ScrollTrigger.create({
@@ -92,52 +99,49 @@ document.addEventListener("DOMContentLoaded", () => {
           currentActiveIndex = activeIndex;
 
           // Transition Left Panel Details Cards
-          gsap.to(detailCards[prevIndex], {
-            opacity: 0,
-            y: -30,
-            duration: 0.35,
-            ease: "power2.inOut",
-            onComplete: () => {
-              gsap.set(detailCards[prevIndex], { display: "none" });
-              gsap.set(detailCards[activeIndex], { display: "flex" });
-              gsap.to(detailCards[activeIndex], {
-                opacity: 1,
-                y: 0,
-                duration: 0.45,
-                ease: "power2.out"
-              });
-            }
-          });
+          if (detailCards[prevIndex] && detailCards[activeIndex]) {
+            gsap.to(detailCards[prevIndex], {
+              opacity: 0,
+              y: -30,
+              duration: 0.35,
+              ease: "power2.inOut",
+              onComplete: () => {
+                gsap.set(detailCards[prevIndex], { display: "none" });
+                gsap.set(detailCards[activeIndex], { display: "flex" });
+                gsap.to(detailCards[activeIndex], {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.45,
+                  ease: "power2.out"
+                });
+              }
+            });
+          }
 
           // Transition Right Panel Browser Mockup Screenshots
-          gsap.to(mockupImages[prevIndex], {
-            opacity: 0,
-            scale: 0.95,
-            duration: 0.4,
-            ease: "power2.inOut"
-          });
-          gsap.to(mockupImages[activeIndex], {
-            opacity: 1,
-            scale: 1,
-            duration: 0.5,
-            ease: "power2.out"
-          });
+          if (mockupImages[prevIndex] && mockupImages[activeIndex]) {
+            gsap.to(mockupImages[prevIndex], {
+              opacity: 0,
+              scale: 0.95,
+              duration: 0.4,
+              ease: "power2.inOut"
+            });
+            gsap.to(mockupImages[activeIndex], {
+              opacity: 1,
+              scale: 1,
+              duration: 0.5,
+              ease: "power2.out"
+            });
+          }
 
           // Smoothly update the browser URL bar text
-          urlText.textContent = projectUrls[activeIndex];
+          if (urlText) urlText.textContent = projectUrls[activeIndex];
         }
 
-        // Update indicator progress dots based on current scroll position
-        const indicators = document.querySelectorAll(".indicator");
-        const totalIndicators = indicators.length;
-        const progressPerIndicator = 1 / totalIndicators;
+        // Update indicator progress dots based on current scroll position via CSS classes
         indicators.forEach((indicator, index) => {
           const indicatorStart = index * progressPerIndicator;
-          const indicatorOpacity = progress > indicatorStart ? 1 : 0.2;
-          gsap.to(indicator, {
-            opacity: indicatorOpacity,
-            duration: 0.1
-          });
+          indicator.classList.toggle("active", progress > indicatorStart);
         });
       }
     });
@@ -146,8 +150,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Run animations on page load
   initAnimations();
 
-  // Re-run animations on window resize to recalculate coordinates and responsive behaviors
+  // Re-run animations only when viewport width changes to avoid mobile address bar height triggers
+  let lastWidth = window.innerWidth;
   window.addEventListener("resize", () => {
-    initAnimations();
+    if (window.innerWidth !== lastWidth) {
+      lastWidth = window.innerWidth;
+      initAnimations();
+    }
   });
 });
