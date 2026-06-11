@@ -20,13 +20,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalImages = heroImages.length;
   let scrollTriggerInstance = null; // Stores ScrollTrigger instance for cleanup
 
-  // Cycle through preloaded images every 1000ms using opacity fades
-  if (totalImages > 0) {
-    setInterval(() => {
+  let slideshowInterval = null;
+
+  const startSlideshow = () => {
+    if (slideshowInterval) return; // Already running
+    slideshowInterval = setInterval(() => {
       heroImages[currentImageIndex].classList.remove("active");
       currentImageIndex = (currentImageIndex + 1) % totalImages;
       heroImages[currentImageIndex].classList.add("active");
     }, 1000);
+  };
+
+  const stopSlideshow = () => {
+    if (slideshowInterval) {
+      clearInterval(slideshowInterval);
+      slideshowInterval = null;
+    }
+  };
+
+  // Cycle through preloaded images every 1000ms using opacity fades
+  if (totalImages > 0) {
+    startSlideshow();
+
+    let scrollTimeout = null;
+    window.addEventListener("scroll", () => {
+      stopSlideshow();
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        startSlideshow();
+      }, 300);
+    });
   }
 
   // Initialize animations with ScrollTrigger
