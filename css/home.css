@@ -60,11 +60,12 @@
     width: 100%;
     height: 100%;
     transform: translateY(-110%) scale(0.25) rotate(-15deg) translateZ(0);
-    border: 0.3em solid var(--fg);
+    outline: 0.3em solid var(--fg);
     border-radius: 2em;
     overflow: hidden;
     will-change: transform;
     backface-visibility: hidden;
+    transform-style: preserve-3d;
   }
 
   .hero-img-holder .hero-img img {
